@@ -29,7 +29,7 @@ function html() {
         var e = document.createElement("button");
         e.setAttribute("class", `saveBtn${time[i]}`);
         var f = document.createElement("img");
-        f.setAttribute("src", "img/Locked.svg.png");
+        f.setAttribute("src", "#");
         f.setAttribute("alt", "");
         f.setAttribute(
             "style",
