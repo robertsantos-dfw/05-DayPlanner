@@ -1,100 +1,115 @@
-// Banner time
-const currentDay = document.querySelector("#currentDay");
-var m = moment().format
-var today = m('dddd, MMMM Do');
+let today = moment().format("MMMM Do YYYY");
 
-currentDay.innerHTML = today
+$("#currentDay").text(today)
 
-var time = [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6];
-var container = document.querySelector(".container");
+console.log(today)
 
-function html() {
-    for (var i = 0; i < time.length; i++) {
-        var a = document.createElement("div");
-        a.setAttribute("class", "row");
+let hours = [{
+        id: "0",
+        hourText: "9 am",
+        time: "09",
+        task: ""
+    },
+    {
+        id: "1",
+        hourText: "10 am",
+        time: "10",
+        task: ""
+    },
+    {
+        id: "2",
+        hourText: "11 am",
+        time: "11",
+        task: ""
+    },
+    {
+        id: "3",
+        hourText: "12 pm",
+        time: "12",
+        task: ""
+    },
+    {
+        id: "4",
+        hourText: "1 pm",
+        time: "13",
+        task: ""
+    },
+    {
+        id: "5",
+        hourText: "2 pm",
+        time: "14",
+        task: ""
+    },
+    {
+        id: "6",
+        hourText: "3 pm",
+        time: "15",
+        task: ""
+    },
+    {
+        id: "7",
+        hourText: "4 pm",
+        time: "16",
+        task: ""
+    },
+    {
+        id: "8",
+        hourText: "5 pm",
+        time: "17",
+        task: ""
+    },
+]
+init()
+loadDayPlanner();
 
-        // div time
-        var b = document.createElement("div");
-        b.setAttribute("id", `time${time[i]}`);
-        b.setAttribute("class", "col-2");
+function loadDayPlanner() {
+    //seeing if local storage is being used or not 
 
-        //div schedule value
-        var c = document.createElement("div");
-        c.setAttribute("id", `col${time[i]}`);
-        c.setAttribute("class", "col-8");
-
-        //div button
-        var d = document.createElement("div");
-        d.setAttribute("class", "col-2");
-        var e = document.createElement("button");
-        e.setAttribute("class", `saveBtn${time[i]}`);
-        var f = document.createElement("img");
-        f.setAttribute("src", "#");
-        f.setAttribute("alt", "");
-        f.setAttribute(
-            "style",
-            "width:100%;height:50px; padding: 0px; margin: 0px"
-        );
-
-        // appending to the container
-        e.append(f);
-        d.append(e);
-        a.append(b);
-        a.append(c);
-        a.append(d);
-        container.append(a);
-    }
-    calendar();
-    getFromLocalStorage();
-    setToLocalStorage();
+    for (let i = 0; i < hours.length; i++) {
+        const hour = hours[i];
+        //adding class based off time.
+        let txtClass = ''
+        if (hour.time < moment().format("HH")) { txtClass = "past"; } else if (hour.time === moment().format("HH")) { txtClass = "present"; } else if (hour.time > moment().format("HH")) { txtClass = "future" }
+        //adding each time slot 
+        let hourID = hour.id
+        let $planner = $(`
+                            <form class="row">
+                                <div id="hour" class="col-md-2 hour text-center p-0">${hour.hourText} </div>
+                                <div id="task" class="col-md-8 description p-0"><textarea id="${hourID}" class="${txtClass} col-md-11">${hour.task}</textarea></div>
+                                <button id="sbtn" class="col-md-1 saveBtn"><i class="far fa-save fa-lg  "></i> </button>
+                            </form> 
+                            `);
+        $("#container").append($planner);
+    };
+};
+//displaying the tasks
+function displayTask() {
+    hours.forEach(function(hour) {
+        $(`#${hour.id}`).val(hour.task);
+    })
+};
+//updating the hours array 
+function saveTask() {
+    localStorage.setItem("hours", JSON.stringify(hours));
 }
-html();
+//save button
+$(".saveBtn").on("click", function(event) {
+    event.preventDefault();
+    var i = $(this).siblings(".description").children("textarea").attr("id");
+    hours[i].task = $(this).siblings(".description").children("textarea").val();
+    saveTask();
+    displayTask();
+    console.log(hours[i])
+})
 
-// Calendar function
-function calendar() {
-    for (let c = 0; c < time.length; c++) {
-        let timeX = document.querySelector(`#time${time[c]}`);
-        let period = function() {
-            if (time[c] < 5 || time[c] == 12) {
-                return "[PM]";
-            } else {
-                return "[AM]";
-            }
-        };
-        let timeat = m.format(`${time[c]} ${period()}`).toString();
-        timeX.append(timeat);
 
-        var col = document.querySelector(`#col${time[c]}`);
-        let x = document.createElement("INPUT");
-        x.setAttribute("type", "text");
-        x.setAttribute("class", `input${time[c]}`);
-        if (timeat == m.format("H [AM]").toString()) {
-            x.setAttribute("placeholder", "Current time");
-            x.style.backgroundColor = "red";
-            col.append(x);
-        } else if (m.format("H") < m.format(`0${time[c]}`)) {
-            x.setAttribute("placeholder", "Coming time");
-            x.style.backgroundColor = "green";
-            col.append(x);
-        } else {
-            x.setAttribute("placeholder", "Passed time");
-            x.style.backgroundColor = "silver";
-            col.append(x);
-        }
+function init() {
+    //local storage set up 
+    let hoursSaved = JSON.parse(localStorage.getItem("hours"));
+    //if nothing has be saved yet, use origial hours array otherwise use hoursSave array
+    if (hoursSaved !== null) {
+        hours = hoursSaved;
     }
-}
-
-//get from storage location
-function getFromLocalStorage() {
-    for (let t = 0; t < time.length; t++) {
-        let period = function() {
-            if (time[t] < 5 || time[t] == 12) {
-                return "pm";
-            } else {
-                return "am";
-            }
-        };
-        let savedEvent = localStorage.getItem(`${time[t]}:00${period()}`);
-        $(`.input${time[t]}`).attr("value", savedEvent);
-    }
+    // Render tasks
+    displayTask();
 }
